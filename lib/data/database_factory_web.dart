@@ -1,4 +1,6 @@
 import 'package:sembast_web/sembast_web.dart';
 
+import '../core/env.dart';
+
 Future<Database> openLocalDatabase() =>
-    databaseFactoryWeb.openDatabase('gestion_locative');
+    databaseFactoryWeb.openDatabase(AppEnv.databaseName);

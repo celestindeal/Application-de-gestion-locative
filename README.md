@@ -9,9 +9,14 @@ quittance PDF au locataire depuis son propre compte Gmail.
 
 ## Version en ligne
 
-<https://celestindeal.github.io/Application-de-gestion-locative/>
+| Environnement | Branche | Adresse |
+| --- | --- | --- |
+| **Prod** (usage quotidien) | `main` | <https://celestindeal.github.io/Application-de-gestion-locative/> |
+| **Test** (validation des nouveautés) | `test` | <https://celestindeal.github.io/Application-de-gestion-locative/test/> |
 
-Publiée automatiquement par GitHub Actions à chaque push sur `main`
+Chaque nouveauté est d'abord déployée en **test** (bandeau orange « TEST », données
+séparées de la prod). Une fois validée, la branche `test` est fusionnée dans `main`
+et part en prod. Publication automatique par GitHub Actions
 (`.github/workflows/deploy.yml`). Le code est public, mais **aucune donnée** n'est
 sur GitHub : biens, locataires et quittances restent dans le navigateur de chaque
 appareil.

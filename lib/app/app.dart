@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/env.dart';
 import 'router.dart';
 
 class GestionLocativeApp extends StatelessWidget {
@@ -31,8 +32,16 @@ class GestionLocativeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(
-    title: 'Gestion locative',
+    title: AppEnv.isTest ? 'Gestion locative (TEST)' : 'Gestion locative',
     debugShowCheckedModeBanner: false,
+    builder: AppEnv.isTest
+        ? (context, child) => Banner(
+            message: 'TEST',
+            location: BannerLocation.topEnd,
+            color: Colors.deepOrange,
+            child: child!,
+          )
+        : null,
     theme: _theme(Brightness.light),
     darkTheme: _theme(Brightness.dark),
     routerConfig: appRouter,

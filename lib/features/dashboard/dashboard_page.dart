@@ -267,7 +267,8 @@ class _LeaseRentCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final p = payment;
-    final missingEmail = tenants.every((t) => t.email.trim().isEmpty);
+    final missingEmail =
+        lease.sendReceipts && tenants.every((t) => t.email.trim().isEmpty);
 
     Widget action;
     if (busy) {
@@ -318,8 +319,10 @@ class _LeaseRentCard extends ConsumerWidget {
           'reste ${Money.format(p.remainingCents)}';
       statusColor = scheme.error;
     } else if (p.sentAt == null) {
-      status = 'Payé le ${Dates.day(p.paymentDate)} · quittance non envoyée';
-      statusColor = scheme.error;
+      status = lease.sendReceipts
+          ? 'Payé le ${Dates.day(p.paymentDate)} · quittance non envoyée'
+          : 'Payé le ${Dates.day(p.paymentDate)} · sans envoi de quittance';
+      statusColor = lease.sendReceipts ? scheme.error : Colors.green.shade700;
     } else {
       status = 'Payé le ${Dates.day(p.paymentDate)} · quittance envoyée';
       statusColor = Colors.green.shade700;
@@ -359,7 +362,8 @@ class _LeaseRentCard extends ConsumerWidget {
                         Icon(
                           p == null
                               ? Icons.schedule
-                              : (p.sentAt != null && !p.isPartial
+                              : ((p.sentAt != null || !lease.sendReceipts) &&
+                                        !p.isPartial
                                     ? Icons.check_circle
                                     : Icons.warning_amber),
                           size: 16,

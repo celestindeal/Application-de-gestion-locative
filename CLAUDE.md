@@ -13,6 +13,20 @@ Voir README.md pour la vision produit et la feuille de route.
   OAuth chez Google ; ne pas en changer.
 - `flutter build web` puis `dart run tool/serve.dart` — version compilée sur :8080.
 
+## Environnements et processus de livraison (à respecter)
+
+- **test** = branche `test` → https://celestindeal.github.io/Application-de-gestion-locative/test/
+- **prod** = branche `main` → https://celestindeal.github.io/Application-de-gestion-locative/
+- Chaque nouveau développement est commité sur `test` et poussé : l'utilisateur
+  le valide sur l'URL de test. Ne jamais pousser directement sur `main`.
+- Quand l'utilisateur valide, mettre en prod : `git checkout main`,
+  `git merge --ff-only test`, `git push`, puis revenir sur `test`.
+- Un push sur l'une ou l'autre branche republie les deux (workflow
+  `.github/workflows/deploy.yml`) ; suivre le run avec `gh run list`.
+- `--dart-define=APP_ENV=test` : base IndexedDB séparée (`gestion_locative_test`)
+  et bandeau « TEST » (`lib/core/env.dart`). Les deux environnements partagent le
+  domaine github.io, donc la même origine OAuth Google.
+
 ## Conventions
 
 - Interface, messages, commentaires et noms de routes en **français**.

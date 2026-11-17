@@ -13,6 +13,7 @@ class Lease implements Entity {
     this.chargesCents = 0,
     this.dueDay = 1,
     this.paymentDay = 5,
+    this.sendReceipts = true,
     this.depositCents = 0,
     this.notes = '',
     DateTime? createdAt,
@@ -38,6 +39,9 @@ class Lease implements Entity {
 
   /// Jour où le locataire paie habituellement (date proposée par défaut).
   final int paymentDay;
+
+  /// Envoyer la quittance par e-mail à chaque paiement validé.
+  final bool sendReceipts;
   final int depositCents;
   final String notes;
   final DateTime createdAt;
@@ -117,6 +121,7 @@ class Lease implements Entity {
     int? chargesCents,
     int? dueDay,
     int? paymentDay,
+    bool? sendReceipts,
     int? depositCents,
     String? notes,
   }) => Lease(
@@ -129,6 +134,7 @@ class Lease implements Entity {
     chargesCents: chargesCents ?? this.chargesCents,
     dueDay: dueDay ?? this.dueDay,
     paymentDay: paymentDay ?? this.paymentDay,
+    sendReceipts: sendReceipts ?? this.sendReceipts,
     depositCents: depositCents ?? this.depositCents,
     notes: notes ?? this.notes,
     createdAt: createdAt,
@@ -145,6 +151,7 @@ class Lease implements Entity {
     'chargesCents': chargesCents,
     'dueDay': dueDay,
     'paymentDay': paymentDay,
+    'sendReceipts': sendReceipts,
     'depositCents': depositCents,
     'notes': notes,
     'createdAt': createdAt.toIso8601String(),
@@ -161,6 +168,7 @@ class Lease implements Entity {
     chargesCents: (json['chargesCents'] as num?)?.toInt() ?? 0,
     dueDay: (json['dueDay'] as num?)?.toInt() ?? 1,
     paymentDay: (json['paymentDay'] as num?)?.toInt() ?? 5,
+    sendReceipts: json['sendReceipts'] as bool? ?? true,
     depositCents: (json['depositCents'] as num?)?.toInt() ?? 0,
     notes: json['notes'] as String? ?? '',
     createdAt: Dates.tryParseIso(json['createdAt']),

@@ -27,6 +27,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
   final _deposit = TextEditingController();
   final _dueDay = TextEditingController(text: '1');
   final _paymentDay = TextEditingController(text: '5');
+  bool _sendReceipts = true;
   final _notes = TextEditingController();
   DateTime? _start = DateTime.now();
   DateTime? _end;
@@ -54,6 +55,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
         _deposit.text = Money.toInput(l.depositCents);
         _dueDay.text = '${l.dueDay}';
         _paymentDay.text = '${l.paymentDay}';
+        _sendReceipts = l.sendReceipts;
         _notes.text = l.notes;
         _start = l.startDate;
         _end = l.endDate;
@@ -92,6 +94,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
       depositCents: Money.parse(_deposit.text) ?? 0,
       dueDay: (int.tryParse(_dueDay.text) ?? 1).clamp(1, 31),
       paymentDay: (int.tryParse(_paymentDay.text) ?? 5).clamp(1, 31),
+      sendReceipts: _sendReceipts,
       notes: _notes.text.trim(),
       createdAt: _existing?.createdAt,
     );
@@ -237,6 +240,16 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
                     MoneyField(
                       controller: _deposit,
                       label: 'Dépôt de garantie',
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Envoyer les quittances par e-mail'),
+                      subtitle: const Text(
+                        'Désactivez si ce locataire n\'en a pas besoin : '
+                        'le paiement sera simplement enregistré.',
+                      ),
+                      value: _sendReceipts,
+                      onChanged: (v) => setState(() => _sendReceipts = v),
                     ),
                     const SectionTitle('Durée'),
                     FieldRow(

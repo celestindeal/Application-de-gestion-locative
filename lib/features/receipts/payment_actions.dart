@@ -37,7 +37,7 @@ abstract final class PaymentActions {
     required int month,
     int? paidCents,
     DateTime? paymentDate,
-    bool sendEmail = true,
+    bool? sendEmail,
   }) async {
     final settings = _settings(ref);
     if (!_checkLandlord(context, settings)) return;
@@ -50,7 +50,7 @@ abstract final class PaymentActions {
           month: month,
           paidCents: paidCents,
           paymentDate: paymentDate,
-          sendEmail: sendEmail,
+          sendEmail: sendEmail ?? lease.sendReceipts,
         );
     if (!context.mounted) return;
     if (outcome.sent) {
@@ -82,7 +82,7 @@ abstract final class PaymentActions {
     final due = lease.totalForMonth(year, month);
     final amount = TextEditingController(text: Money.toInput(due));
     var date = initialDate ?? lease.defaultPaymentDate(year, month);
-    var send = true;
+    var send = lease.sendReceipts;
     final form = GlobalKey<FormState>();
     final confirmed = await showDialog<bool>(
       context: context,

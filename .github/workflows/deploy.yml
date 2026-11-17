@@ -1,10 +1,12 @@
-# Compile l'application et la publie sur GitHub Pages à chaque push sur main.
-# URL : https://<utilisateur>.github.io/<nom-du-depot>/
+# Publie les deux environnements sur GitHub Pages :
+#   prod (branche main) -> https://<utilisateur>.github.io/<depot>/
+#   test (branche test) -> https://<utilisateur>.github.io/<depot>/test/
+# Un push sur l'une ou l'autre branche recompile et republie les deux.
 name: Déploiement GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, test]
   workflow_dispatch:
 
 permissions:
@@ -19,8 +21,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      REPO: ${{ github.event.repository.name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: env-prod
+
+      - name: Récupérer la branche test (si elle existe)
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}" test; then
+            git clone --depth 1 --branch test "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" env-test
+          fi
 
       - uses: subosito/flutter-action@v2
         with:
@@ -28,14 +41,34 @@ jobs:
           flutter-version: 3.47.9
           cache: true
 
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
-      - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      - name: Compiler la prod
+        working-directory: env-prod
+        run: |
+          flutter pub get
+          flutter test
+          flutter build web --release --base-href "/$REPO/" --dart-define=APP_ENV=prod
+
+      - name: Compiler le test
+        if: hashFiles('env-test/pubspec.yaml') != ''
+        working-directory: env-test
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build web --release --base-href "/$REPO/test/" --dart-define=APP_ENV=test
+
+      - name: Assembler le site
+        run: |
+          mkdir site
+          cp -r env-prod/build/web/. site/
+          if [ -d env-test/build/web ]; then
+            mkdir site/test
+            cp -r env-test/build/web/. site/test/
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/web
+          path: site
 
   deploy:
     needs: build
