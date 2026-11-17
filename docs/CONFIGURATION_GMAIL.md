@@ -34,8 +34,9 @@ des mails en votre nom, mais **ne peut pas lire** votre boîte de réception.
 2. Type d'application : **Application Web**.
 3. **Origines JavaScript autorisées** — ajoutez chaque adresse depuis laquelle vous
    ouvrez l'application :
-   - `http://localhost:8080` (sur l'ordinateur)
-   - plus tard, l'adresse HTTPS d'hébergement pour l'iPhone (ex. `https://locatif.mondomaine.fr`)
+   - `http://localhost:8080` (version locale sur l'ordinateur)
+   - `https://celestindeal.github.io` (version en ligne, GitHub Pages — ordinateur et iPhone)
+   - plus tard, l'adresse du Raspberry Pi si l'application y est hébergée
 4. Pas besoin d'« URI de redirection ».
 5. **Créer**, puis copiez l'**ID client** (`xxxxxxxx.apps.googleusercontent.com`).
 

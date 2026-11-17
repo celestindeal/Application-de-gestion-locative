@@ -7,7 +7,16 @@ sans passer par les stores (application web installable / PWA).
 clic sur « Paiement reçu », enregistrer le loyer du mois et envoyer automatiquement la
 quittance PDF au locataire depuis son propre compte Gmail.
 
-## Démarrer
+## Version en ligne
+
+<https://celestindeal.github.io/Application-de-gestion-locative/>
+
+Publiée automatiquement par GitHub Actions à chaque push sur `main`
+(`.github/workflows/deploy.yml`). Le code est public, mais **aucune donnée** n'est
+sur GitHub : biens, locataires et quittances restent dans le navigateur de chaque
+appareil.
+
+## Démarrer en local
 
 Prérequis : [Flutter](https://docs.flutter.dev/get-started/install) (stable).
 
@@ -67,7 +76,8 @@ Raspberry Pi (voir Feuille de route).
 ## Utiliser l'application sur iPhone
 
 L'iPhone doit accéder à l'application via une adresse **HTTPS** (exigence de Google
-pour la connexion Gmail et de Safari pour l'installation). Options :
+pour la connexion Gmail et de Safari pour l'installation). La version GitHub Pages
+ci-dessus convient. Autres options :
 
 | Option | Coût | Remarques |
 | --- | --- | --- |
