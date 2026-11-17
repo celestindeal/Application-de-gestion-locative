@@ -54,6 +54,54 @@ void main() {
     expect(l.coversMonth(2026, 10), isFalse);
   });
 
+  group('Prorata et date de paiement', () {
+    final lease = Lease(
+      id: 'l',
+      propertyId: 'p',
+      tenantIds: const ['t'],
+      startDate: DateTime(2026, 10, 10),
+      rentCents: 62000,
+      chargesCents: 3100,
+    );
+
+    test('entrée le 10 octobre : 22 jours sur 31', () {
+      expect(lease.isProrated(2026, 10), isTrue);
+      expect(lease.occupiedDays(2026, 10), 22);
+      expect(lease.rentForMonth(2026, 10), 44000); // 620 × 22/31
+      expect(lease.chargesForMonth(2026, 10), 2200);
+      expect(lease.totalForMonth(2026, 10), 46200);
+      expect(lease.periodStart(2026, 10), DateTime(2026, 10, 10));
+      expect(lease.periodEnd(2026, 10), DateTime(2026, 10, 31));
+    });
+
+    test('mois complet ensuite', () {
+      expect(lease.isProrated(2026, 11), isFalse);
+      expect(lease.totalForMonth(2026, 11), 65100);
+    });
+
+    test('sortie en cours de mois', () {
+      final l = lease.copyWith(endDate: DateTime(2027, 2, 14));
+      expect(l.occupiedDays(2027, 2), 14);
+      expect(l.rentForMonth(2027, 2), 31000); // 620 × 14/28
+    });
+
+    test('date par défaut : le 5, sinon entrée, jamais dans le futur', () {
+      final today = DateTime(2026, 11, 17);
+      expect(
+        lease.defaultPaymentDate(2026, 11, today: today),
+        DateTime(2026, 11, 5),
+      );
+      expect(
+        lease.defaultPaymentDate(2026, 10, today: today),
+        DateTime(2026, 10, 10),
+      );
+      expect(
+        lease.defaultPaymentDate(2026, 12, today: DateTime(2026, 12, 3)),
+        DateTime(2026, 12, 3),
+      );
+    });
+  });
+
   test('MimeMessage : en-têtes et pièce jointe', () {
     final raw = MimeMessage(
       to: const ['locataire@example.com'],

@@ -17,6 +17,8 @@ class RentPayment implements Entity {
     required this.paidCents,
     required this.paymentDate,
     required this.receiptNumber,
+    this.periodStart,
+    this.periodEnd,
     this.sentAt,
     this.sentTo = const [],
     DateTime? createdAt,
@@ -32,6 +34,11 @@ class RentPayment implements Entity {
   final int chargesCents;
   final int paidCents;
   final DateTime paymentDate;
+
+  /// Période réellement couverte (entrée/sortie en cours de mois).
+  /// Null = mois complet (paiements enregistrés avant le prorata).
+  final DateTime? periodStart;
+  final DateTime? periodEnd;
 
   /// Ex. "2026-007"
   final String receiptNumber;
@@ -49,6 +56,13 @@ class RentPayment implements Entity {
 
   String get periodLabel => Dates.monthYear(year, month);
 
+  DateTime get effectiveStart =>
+      periodStart ?? Dates.firstDayOfMonth(year, month);
+  DateTime get effectiveEnd => periodEnd ?? Dates.lastDayOfMonth(year, month);
+  int get coveredDays => effectiveEnd.difference(effectiveStart).inDays + 1;
+  int get daysInMonth => Dates.lastDayOfMonth(year, month).day;
+  bool get isProrated => coveredDays < daysInMonth;
+
   RentPayment copyWith({
     int? paidCents,
     DateTime? paymentDate,
@@ -65,6 +79,8 @@ class RentPayment implements Entity {
     paidCents: paidCents ?? this.paidCents,
     paymentDate: paymentDate ?? this.paymentDate,
     receiptNumber: receiptNumber,
+    periodStart: periodStart,
+    periodEnd: periodEnd,
     sentAt: sentAt ?? this.sentAt,
     sentTo: sentTo ?? this.sentTo,
     createdAt: createdAt,
@@ -82,6 +98,8 @@ class RentPayment implements Entity {
     'paidCents': paidCents,
     'paymentDate': Dates.isoDate(paymentDate),
     'receiptNumber': receiptNumber,
+    'periodStart': periodStart == null ? null : Dates.isoDate(periodStart!),
+    'periodEnd': periodEnd == null ? null : Dates.isoDate(periodEnd!),
     'sentAt': sentAt?.toIso8601String(),
     'sentTo': sentTo,
     'createdAt': createdAt.toIso8601String(),
@@ -98,6 +116,8 @@ class RentPayment implements Entity {
     paidCents: (json['paidCents'] as num?)?.toInt() ?? 0,
     paymentDate: Dates.tryParseIso(json['paymentDate']) ?? DateTime.now(),
     receiptNumber: json['receiptNumber'] as String? ?? '',
+    periodStart: Dates.tryParseIso(json['periodStart']),
+    periodEnd: Dates.tryParseIso(json['periodEnd']),
     sentAt: Dates.tryParseIso(json['sentAt']),
     sentTo: (json['sentTo'] as List?)?.cast<String>().toList() ?? const [],
     createdAt: Dates.tryParseIso(json['createdAt']),

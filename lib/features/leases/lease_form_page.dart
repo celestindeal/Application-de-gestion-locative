@@ -26,6 +26,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
   final _charges = TextEditingController();
   final _deposit = TextEditingController();
   final _dueDay = TextEditingController(text: '1');
+  final _paymentDay = TextEditingController(text: '5');
   final _notes = TextEditingController();
   DateTime? _start = DateTime.now();
   DateTime? _end;
@@ -52,6 +53,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
         _charges.text = Money.toInput(l.chargesCents);
         _deposit.text = Money.toInput(l.depositCents);
         _dueDay.text = '${l.dueDay}';
+        _paymentDay.text = '${l.paymentDay}';
         _notes.text = l.notes;
         _start = l.startDate;
         _end = l.endDate;
@@ -63,7 +65,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
 
   @override
   void dispose() {
-    for (final c in [_rent, _charges, _deposit, _dueDay, _notes]) {
+    for (final c in [_rent, _charges, _deposit, _dueDay, _paymentDay, _notes]) {
       c.dispose();
     }
     super.dispose();
@@ -89,6 +91,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
       chargesCents: Money.parse(_charges.text) ?? 0,
       depositCents: Money.parse(_deposit.text) ?? 0,
       dueDay: (int.tryParse(_dueDay.text) ?? 1).clamp(1, 31),
+      paymentDay: (int.tryParse(_paymentDay.text) ?? 5).clamp(1, 31),
       notes: _notes.text.trim(),
       createdAt: _existing?.createdAt,
     );
@@ -217,11 +220,23 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
                                 : null;
                           },
                         ),
-                        MoneyField(
-                          controller: _deposit,
-                          label: 'Dépôt de garantie',
+                        AppTextField(
+                          controller: _paymentDay,
+                          label: 'Jour de paiement habituel',
+                          hint: 'Date proposée par défaut',
+                          keyboardType: TextInputType.number,
+                          validator: (v) {
+                            final n = int.tryParse(v ?? '');
+                            return n == null || n < 1 || n > 31
+                                ? 'Entre 1 et 31'
+                                : null;
+                          },
                         ),
                       ],
+                    ),
+                    MoneyField(
+                      controller: _deposit,
+                      label: 'Dépôt de garantie',
                     ),
                     const SectionTitle('Durée'),
                     FieldRow(

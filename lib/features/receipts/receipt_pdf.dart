@@ -57,8 +57,11 @@ Future<pw.ThemeData> _theme() async {
 Future<Uint8List> buildReceiptPdf(ReceiptData d) async {
   final p = d.payment;
   final l = d.landlord;
-  final from = Dates.firstDayOfMonth(p.year, p.month);
-  final to = Dates.lastDayOfMonth(p.year, p.month);
+  final from = p.effectiveStart;
+  final to = p.effectiveEnd;
+  final prorata = p.isProrated
+      ? ' (prorata ${p.coveredDays}/${p.daysInMonth} jours)'
+      : '';
   final title = p.isPartial ? 'REÇU DE PAIEMENT PARTIEL' : 'QUITTANCE DE LOYER';
   final accent = PdfColor.fromHex('#1F4E79');
 
@@ -145,7 +148,9 @@ Future<Uint8List> buildReceiptPdf(ReceiptData d) async {
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    'Période : ${p.periodLabel}',
+                    p.isProrated
+                        ? 'Période : du ${Dates.day(from)} au ${Dates.day(to)}'
+                        : 'Période : ${p.periodLabel}',
                     style: const pw.TextStyle(fontSize: 12),
                   ),
                 ],
@@ -200,8 +205,11 @@ Future<Uint8List> buildReceiptPdf(ReceiptData d) async {
               1: pw.FlexColumnWidth(1.4),
             },
             children: [
-              row('Loyer hors charges', Money.format(p.rentCents)),
-              row('Provision pour charges', Money.format(p.chargesCents)),
+              row('Loyer hors charges$prorata', Money.format(p.rentCents)),
+              row(
+                'Provision pour charges$prorata',
+                Money.format(p.chargesCents),
+              ),
               row(
                 'Total dû pour la période',
                 Money.format(p.dueCents),

@@ -84,11 +84,14 @@ class ReceiptService {
       propertyId: lease.propertyId,
       year: year,
       month: month,
-      rentCents: lease.rentCents,
-      chargesCents: lease.chargesCents,
-      paidCents: paidCents ?? lease.totalCents,
-      paymentDate: paymentDate ?? DateTime.now(),
+      // Montants au prorata si entrée/sortie en cours de mois.
+      rentCents: lease.rentForMonth(year, month),
+      chargesCents: lease.chargesForMonth(year, month),
+      paidCents: paidCents ?? lease.totalForMonth(year, month),
+      paymentDate: paymentDate ?? lease.defaultPaymentDate(year, month),
       receiptNumber: await _nextReceiptNumber(year),
+      periodStart: lease.periodStart(year, month),
+      periodEnd: lease.periodEnd(year, month),
     );
     await payments.save(payment);
 

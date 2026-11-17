@@ -77,9 +77,11 @@ abstract final class PaymentActions {
     required Lease lease,
     required int year,
     required int month,
+    DateTime? initialDate,
   }) async {
-    final amount = TextEditingController(text: Money.toInput(lease.totalCents));
-    var date = DateTime.now();
+    final due = lease.totalForMonth(year, month);
+    final amount = TextEditingController(text: Money.toInput(due));
+    var date = initialDate ?? lease.defaultPaymentDate(year, month);
     var send = true;
     final form = GlobalKey<FormState>();
     final confirmed = await showDialog<bool>(
@@ -95,7 +97,14 @@ abstract final class PaymentActions {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Montant dû : ${Money.format(lease.totalCents)}'),
+                  Text('Montant dû : ${Money.format(due)}'),
+                  if (lease.isProrated(year, month))
+                    Text(
+                      'Prorata : ${lease.occupiedDays(year, month)} jours '
+                      'sur ${Dates.lastDayOfMonth(year, month).day} '
+                      '(loyer mensuel ${Money.format(lease.totalCents)})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   const SizedBox(height: 12),
                   MoneyField(
                     controller: amount,

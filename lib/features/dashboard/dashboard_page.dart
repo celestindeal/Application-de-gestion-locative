@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
 import '../../core/widgets.dart';
@@ -25,6 +26,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   late int _year = DateTime.now().year;
   late int _month = DateTime.now().month;
   final Set<String> _busy = {};
+
+  // Date de paiement choisie avant de cliquer sur "Paiement reçu".
+  final Map<String, DateTime> _chosenDates = {};
+  String _dateKey(Lease l) => "${l.id}|$_year|$_month";
+  DateTime _dateFor(Lease l) =>
+      _chosenDates[_dateKey(l)] ?? l.defaultPaymentDate(_year, _month);
+
+  Future<void> _pickDate(Lease lease) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      helpText: "Date du paiement",
+      initialDate: _dateFor(lease),
+      firstDate: DateTime(_year - 1),
+      lastDate: now,
+    );
+    if (picked != null) setState(() => _chosenDates[_dateKey(lease)] = picked);
+  }
 
   void _shiftMonth(int delta) {
     final d = DateTime(_year, _month + delta);
@@ -69,7 +88,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               )
               .firstOrNull;
 
-          final expected = leases.fold(0, (s, l) => s + l.totalCents);
+          final expected = leases.fold(
+            0,
+            (s, l) => s + l.totalForMonth(_year, _month),
+          );
           final received = leases.fold(
             0,
             (s, l) => s + (paymentFor(l)?.paidCents ?? 0),
@@ -129,6 +151,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         .toList(),
                     payment: paymentFor(lease),
                     busy: _busy.contains(lease.id),
+                    year: _year,
+                    month: _month,
+                    paymentDate: _dateFor(lease),
+                    onPickDate: () => _pickDate(lease),
                     onValidate: () => _run(
                       lease.id,
                       () => PaymentActions.validate(
@@ -137,6 +163,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         lease: lease,
                         year: _year,
                         month: _month,
+                        paymentDate: _dateFor(lease),
                       ),
                     ),
                     onValidateWithDetails: () => _run(
@@ -147,6 +174,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         lease: lease,
                         year: _year,
                         month: _month,
+                        initialDate: _dateFor(lease),
                       ),
                     ),
                   ),
@@ -214,6 +242,10 @@ class _LeaseRentCard extends ConsumerWidget {
     required this.tenants,
     required this.payment,
     required this.busy,
+    required this.year,
+    required this.month,
+    required this.paymentDate,
+    required this.onPickDate,
     required this.onValidate,
     required this.onValidateWithDetails,
   });
@@ -223,6 +255,10 @@ class _LeaseRentCard extends ConsumerWidget {
   final List<Tenant> tenants;
   final RentPayment? payment;
   final bool busy;
+  final int year;
+  final int month;
+  final DateTime paymentDate;
+  final VoidCallback onPickDate;
   final VoidCallback onValidate;
   final VoidCallback onValidateWithDetails;
 
@@ -244,16 +280,24 @@ class _LeaseRentCard extends ConsumerWidget {
         ),
       );
     } else if (p == null) {
-      action = Row(
-        mainAxisSize: MainAxisSize.min,
+      action = Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          Tooltip(
+            message: 'Changer la date du paiement',
+            child: TextButton.icon(
+              onPressed: onPickDate,
+              icon: const Icon(Icons.event, size: 18),
+              label: Text('le ${DateFormat('dd/MM').format(paymentDate)}'),
+            ),
+          ),
           FilledButton.icon(
             onPressed: onValidate,
             icon: const Icon(Icons.check),
             label: const Text('Paiement reçu'),
           ),
           IconButton(
-            tooltip: 'Montant ou date différents…',
+            tooltip: 'Autre montant (paiement partiel…)',
             onPressed: onValidateWithDetails,
             icon: const Icon(Icons.tune),
           ),
@@ -303,7 +347,9 @@ class _LeaseRentCard extends ConsumerWidget {
                       style: theme.textTheme.titleMedium,
                     ),
                     Text(
-                      '${tenants.map((t) => t.displayName).join(', ')} · ${Money.format(lease.totalCents)}',
+                      '${tenants.map((t) => t.displayName).join(', ')} · '
+                      '${Money.format(lease.totalForMonth(year, month))}'
+                      '${lease.isProrated(year, month) ? ' (prorata ${lease.occupiedDays(year, month)} j)' : ''}',
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 4),
