@@ -294,8 +294,10 @@ class _LeaseRentCard extends ConsumerWidget {
           ),
           FilledButton.icon(
             onPressed: onValidate,
-            icon: const Icon(Icons.check),
-            label: const Text('Paiement reçu'),
+            icon: Icon(lease.sendReceipts ? Icons.send : Icons.check),
+            label: Text(
+              lease.sendReceipts ? 'Paiement reçu + envoi' : 'Paiement reçu',
+            ),
           ),
           IconButton(
             tooltip: 'Autre montant (paiement partiel…)',
@@ -380,6 +382,34 @@ class _LeaseRentCard extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    if (p == null && !missingEmail)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              lease.sendReceipts
+                                  ? Icons.mail_outline
+                                  : Icons.unsubscribe_outlined,
+                              size: 16,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                lease.sendReceipts
+                                    ? 'Quittance envoyée au clic à '
+                                          '${tenants.map((t) => t.email).where((e) => e.isNotEmpty).join(', ')}'
+                                    : 'Pas d\'envoi de quittance (réglé dans le bail)',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (p == null && missingEmail)
                       Text(
                         '⚠ Aucun e-mail locataire : la quittance ne pourra '
