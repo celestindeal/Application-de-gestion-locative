@@ -27,6 +27,19 @@ Voir README.md pour la vision produit et la feuille de route.
   et bandeau « TEST » (`lib/core/env.dart`). Les deux environnements partagent le
   domaine github.io, donc la même origine OAuth Google.
 
+## Serveur de données (Raspberry Pi) — voir docs/SERVEUR.md
+
+- Module Home Assistant `serveur/` (slug `gestion_locative`) : deux PocketBase
+  séparés, PROD (port 443 public, `/data/pb_prod`) et TEST (port 8443,
+  `/data/pb_test`), une clé chacun. Toute modification du module : augmenter
+  `version` dans `serveur/config.yaml`.
+- App : base locale + file d'attente (`lib/data/sync/`). Les repositories des
+  providers sont des `SyncedRepository` : toute écriture passe par eux pour être
+  envoyée. Nouvelle entité synchronisée = nouveau `SyncType` + repository dans
+  `syncServiceProvider`.
+- La clé n'est jamais dans le code ni le build (site public) : saisie par
+  appareil dans Paramètres › Synchronisation (`SyncConfig`, store `device`).
+
 ## Conventions
 
 - Interface, messages, commentaires et noms de routes en **français**.

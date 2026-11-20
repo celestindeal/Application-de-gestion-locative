@@ -1,0 +1,28 @@
+# Module Home Assistant : serveur de données de l'app de gestion locative.
+# Deux bases PocketBase complètement séparées (prod et test), chacune avec sa
+# clé ; Tailscale Funnel donne les adresses HTTPS publiques (aucun port à
+# ouvrir sur la box) :
+#   prod : https://<nom_tailscale>.<réseau>.ts.net        (port 443)
+#   test : https://<nom_tailscale>.<réseau>.ts.net:8443   (port 8443)
+name: Gestion locative
+version: "1.0.0"
+slug: gestion_locative
+description: Serveur de données de l'app de gestion locative (bases prod et test séparées, partage entre appareils).
+url: https://github.com/celestindeal/Application-de-gestion-locative/tree/test/serveur
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: application
+boot: auto
+# Arrêté pendant les sauvegardes de Home Assistant : les bases sont copiées au repos.
+backup: cold
+options:
+  cle_prod: ""
+  cle_test: ""
+  nom_tailscale: gestion-locative
+schema:
+  cle_prod: "match(^[A-Za-z0-9-]{20,}$)"
+  cle_test: "match(^[A-Za-z0-9-]{20,}$)"
+  nom_tailscale: "match(^[a-z0-9-]{1,63}$)"
+  cle_tailscale: "password?"

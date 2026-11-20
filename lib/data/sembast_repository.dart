@@ -15,6 +15,12 @@ class SembastRepository<T extends Entity> implements Repository<T> {
   T _decode(RecordSnapshot<String, Map<String, Object?>> s) =>
       _fromJson({...s.value, 'id': s.key});
 
+  /// Reconstruit une entité depuis son JSON (ex. reçu du serveur).
+  T decode(String id, Map<String, Object?> json) =>
+      _fromJson({...json, 'id': id});
+
+  Future<List<String>> ids() => _store.findKeys(_db);
+
   @override
   Stream<List<T>> watchAll() =>
       _store.query().onSnapshots(_db).map((list) => list.map(_decode).toList());

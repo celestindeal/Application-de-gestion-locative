@@ -66,17 +66,14 @@ Première utilisation : suivre le guide « Pour bien démarrer » de l'accueil, 
 
 ## Données
 
-Pour l'instant, **les données sont stockées uniquement dans le navigateur** de
-l'appareil (IndexedDB). Conséquences :
+Chaque appareil garde ses données dans le navigateur (l'app marche sans
+réseau), et les **partage via le serveur de la Raspberry Pi** une fois relié
+(*Paramètres › Synchronisation*, avec la clé de la base). Prod et test ont
+**deux bases séparées** sur le serveur. Installation, fonctionnement et
+entretien : [docs/SERVEUR.md](docs/SERVEUR.md).
 
-- l'ordinateur et l'iPhone ont chacun leurs propres données ;
-- vider les données du navigateur efface tout.
-
-👉 **Paramètres → Exporter une sauvegarde** régulièrement (fichier JSON). Ce fichier
-permet aussi de transférer les données d'un appareil à l'autre (*Restaurer*).
-
-La synchronisation entre appareils et utilisateurs viendra avec le serveur sur le
-Raspberry Pi (voir Feuille de route).
+**Paramètres → Exporter une sauvegarde** reste disponible (fichier JSON), en
+plus des sauvegardes Home Assistant du serveur.
 
 ## Utiliser l'application sur iPhone
 
@@ -131,4 +128,4 @@ Choix structurants, pensés pour la suite :
 - [ ] Suivi des chantiers (devis, factures, avancement)
 - [ ] Étude de rentabilité à l'achat (rendement, cash-flow, fiscalité)
 - [ ] Comptabilité (recettes/dépenses par bien, export déclaration 2044 / LMNP)
-- [ ] Serveur sur Raspberry Pi 5 : base partagée, synchronisation, multi-utilisateurs
+- [x] Serveur sur Raspberry Pi 5 : base partagée (prod et test séparées), synchronisation

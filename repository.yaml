@@ -1,0 +1,6 @@
+# Dépôt de modules Home Assistant : le serveur de données de l'app de gestion
+# locative (dossier serveur/). Dans Home Assistant : Apps → Boutique → ⋮ →
+# Dépôts, ajouter https://github.com/celestindeal/Application-de-gestion-locative#test
+name: Gestion locative
+url: https://github.com/celestindeal/Application-de-gestion-locative
+maintainer: celestindeal

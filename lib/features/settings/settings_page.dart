@@ -13,6 +13,7 @@ import '../../data/providers.dart';
 import '../../models/landlord_settings.dart';
 import '../../services/gmail_service.dart';
 import '../../services/mime_message.dart';
+import 'sync_section.dart';
 
 final backupServiceProvider = Provider<BackupService>(
   (ref) => BackupService(
@@ -320,12 +321,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       '{adresse}, {bailleur}',
                       style: TextStyle(fontSize: 12),
                     ),
-                    const SectionTitle('Données'),
+                    const SectionTitle('Synchronisation'),
+                    const SyncSection(),
+                    const SectionTitle('Sauvegarde'),
                     const Text(
-                      'Vos données sont enregistrées uniquement dans ce '
-                      'navigateur, sur cet appareil. Exportez régulièrement '
-                      'une sauvegarde ; elle permet aussi de transférer vos '
-                      'données vers un autre appareil (ex. iPhone).',
+                      'Une copie complète de vos données dans un fichier. '
+                      'Utile en plus du serveur, ou pour reprendre des '
+                      'données d\'un appareil non synchronisé.',
                     ),
                     const SizedBox(height: 12),
                     Wrap(

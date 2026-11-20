@@ -1,0 +1,20 @@
+configuration:
+  cle_prod:
+    name: Clé de la base PROD
+    description: >-
+      À saisir une fois sur chaque appareil, dans l'app de PROD (Paramètres › Synchronisation).
+      20 caractères minimum : lettres, chiffres et tirets. Différente de la clé de test.
+  cle_test:
+    name: Clé de la base TEST
+    description: >-
+      À saisir dans l'app de TEST (Paramètres › Synchronisation).
+      20 caractères minimum : lettres, chiffres et tirets. Différente de la clé de prod.
+  nom_tailscale:
+    name: Nom du serveur sur Tailscale
+    description: >-
+      Début des adresses publiques : https://gestion-locative.xxxx.ts.net (prod)
+      et https://gestion-locative.xxxx.ts.net:8443 (test).
+  cle_tailscale:
+    name: Clé d'authentification Tailscale (facultative)
+    description: >-
+      Inutile en général : au premier démarrage, un lien de connexion s'affiche dans le journal.

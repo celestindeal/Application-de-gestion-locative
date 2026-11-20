@@ -1,14 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sembast/sembast.dart';
 
+import '../models/entity.dart';
 import '../models/landlord_settings.dart';
 import '../models/lease.dart';
 import '../models/property.dart';
 import '../models/rent_payment.dart';
 import '../models/tenant.dart';
-import 'repository.dart';
 import 'sembast_repository.dart';
 import 'settings_repository.dart';
+import 'sync/sync_config.dart';
+import 'sync/sync_queue.dart';
+import 'sync/sync_remote.dart';
+import 'sync/sync_service.dart';
+import 'sync/synced_repository.dart';
 
 /// Fourni dans main() via `overrideWithValue`.
 final databaseProvider = Provider<Database>(
@@ -16,40 +21,87 @@ final databaseProvider = Provider<Database>(
 );
 
 // ---- Repositories ---------------------------------------------------------
-// Pour passer au serveur Raspberry Pi : remplacer SembastRepository par une
-// implémentation HTTP ici, et uniquement ici.
+// Base locale (IndexedDB) + file d'attente de synchronisation avec le serveur
+// de la Raspberry Pi (voir docs/SERVEUR.md). Les écrans ne voient que
+// l'interface Repository.
 
-final propertyRepositoryProvider = Provider<Repository<Property>>(
-  (ref) => SembastRepository(
-    ref.watch(databaseProvider),
-    'properties',
-    Property.fromJson,
-  ),
+final syncQueueProvider = Provider<SyncQueue>(
+  (ref) => SyncQueue(ref.watch(databaseProvider)),
 );
 
-final tenantRepositoryProvider = Provider<Repository<Tenant>>(
-  (ref) => SembastRepository(
-    ref.watch(databaseProvider),
-    'tenants',
-    Tenant.fromJson,
-  ),
+SyncedRepository<T> _synced<T extends Entity>(
+  Ref ref,
+  String store,
+  T Function(Map<String, Object?>) fromJson,
+  SyncType type,
+) => SyncedRepository(
+  SembastRepository(ref.watch(databaseProvider), store, fromJson),
+  ref.watch(syncQueueProvider),
+  type,
 );
 
-final leaseRepositoryProvider = Provider<Repository<Lease>>(
-  (ref) =>
-      SembastRepository(ref.watch(databaseProvider), 'leases', Lease.fromJson),
+final propertyRepositoryProvider = Provider<SyncedRepository<Property>>(
+  (ref) => _synced(ref, 'properties', Property.fromJson, SyncType.property),
 );
 
-final paymentRepositoryProvider = Provider<Repository<RentPayment>>(
-  (ref) => SembastRepository(
-    ref.watch(databaseProvider),
-    'payments',
-    RentPayment.fromJson,
-  ),
+final tenantRepositoryProvider = Provider<SyncedRepository<Tenant>>(
+  (ref) => _synced(ref, 'tenants', Tenant.fromJson, SyncType.tenant),
+);
+
+final leaseRepositoryProvider = Provider<SyncedRepository<Lease>>(
+  (ref) => _synced(ref, 'leases', Lease.fromJson, SyncType.lease),
+);
+
+final paymentRepositoryProvider = Provider<SyncedRepository<RentPayment>>(
+  (ref) => _synced(ref, 'payments', RentPayment.fromJson, SyncType.payment),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(
-  (ref) => SettingsRepository(ref.watch(databaseProvider)),
+  (ref) => SettingsRepository(
+    ref.watch(databaseProvider),
+    ref.watch(syncQueueProvider),
+  ),
+);
+
+// ---- Synchronisation ------------------------------------------------------
+
+final syncConfigRepositoryProvider = Provider<SyncConfigRepository>(
+  (ref) => SyncConfigRepository(ref.watch(databaseProvider)),
+);
+
+final syncServiceProvider = Provider<SyncService>((ref) {
+  final service = SyncService(
+    config: ref.watch(syncConfigRepositoryProvider),
+    queue: ref.watch(syncQueueProvider),
+    repositories: {
+      SyncType.property: ref.watch(propertyRepositoryProvider),
+      SyncType.tenant: ref.watch(tenantRepositoryProvider),
+      SyncType.lease: ref.watch(leaseRepositoryProvider),
+      SyncType.payment: ref.watch(paymentRepositoryProvider),
+    },
+    settings: ref.watch(settingsRepositoryProvider),
+    remoteFactory: (c) =>
+        PocketBaseRemote(address: c.serverUrl, key: c.key, device: c.deviceId),
+  );
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+final syncStatusProvider = StreamProvider<SyncStatus>((ref) {
+  final service = ref.watch(syncServiceProvider);
+  return Stream.multi((c) {
+    c.add(service.current);
+    final sub = service.status.listen(c.add);
+    c.onCancel = sub.cancel;
+  });
+});
+
+final syncPendingCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(syncQueueProvider).watchCount(),
+);
+
+final syncConfigProvider = StreamProvider<SyncConfig?>(
+  (ref) => ref.watch(syncConfigRepositoryProvider).watch(),
 );
 
 // ---- Flux de données ------------------------------------------------------

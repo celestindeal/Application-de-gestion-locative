@@ -13,4 +13,12 @@ abstract final class AppEnv {
   static const databaseName = isTest
       ? 'gestion_locative_test'
       : 'gestion_locative';
+
+  /// Adresse proposée par défaut pour le serveur de données (Raspberry Pi,
+  /// module Home Assistant « Gestion locative », voir docs/SERVEUR.md).
+  /// Deux bases séparées : prod sur le port 443, test sur le port 8443.
+  /// Modifiable dans Paramètres › Synchronisation.
+  static const defaultServerUrl = isTest
+      ? 'https://gestion-locative.tail8a91ff.ts.net:8443'
+      : 'https://gestion-locative.tail8a91ff.ts.net';
 }

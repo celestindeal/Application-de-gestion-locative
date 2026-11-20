@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/env.dart';
+import '../data/providers.dart';
 import 'router.dart';
 
-class GestionLocativeApp extends StatelessWidget {
+class GestionLocativeApp extends ConsumerStatefulWidget {
   const GestionLocativeApp({super.key});
+
+  @override
+  ConsumerState<GestionLocativeApp> createState() => _GestionLocativeAppState();
+}
+
+class _GestionLocativeAppState extends ConsumerState<GestionLocativeApp> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Synchronisation avec le serveur : au démarrage, toutes les 30 s, et au
+    // retour dans l'app.
+    final sync = ref.read(syncServiceProvider)..start();
+    _lifecycle = AppLifecycleListener(onResume: sync.syncNow);
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
 
   static const _seed = Color(0xFF1F4E79);
 
