@@ -19,6 +19,6 @@ abstract final class AppEnv {
   /// Deux bases séparées : prod sur le port 443, test sur le port 8443.
   /// Modifiable dans Paramètres › Synchronisation.
   static const defaultServerUrl = isTest
-      ? 'https://gestion-locative.tail8a91ff.ts.net:8443'
-      : 'https://gestion-locative.tail8a91ff.ts.net';
+      ? 'https://gestion-locative.taile55644.ts.net:8443'
+      : 'https://gestion-locative.taile55644.ts.net';
 }

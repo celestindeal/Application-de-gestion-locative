@@ -24,7 +24,7 @@ App TEST  (github.io/Application-de-gestion-locative/test/)  ──HTTPS :8443�
 | | PROD | TEST |
 |---|---|---|
 | App | <https://celestindeal.github.io/Application-de-gestion-locative/> | <https://celestindeal.github.io/Application-de-gestion-locative/test/> |
-| Adresse du serveur | `https://gestion-locative.tail8a91ff.ts.net` | `https://gestion-locative.tail8a91ff.ts.net:8443` |
+| Adresse du serveur | `https://gestion-locative.taile55644.ts.net` | `https://gestion-locative.taile55644.ts.net:8443` |
 | Base PocketBase | `/data/pb_prod` (port interne 8090) | `/data/pb_test` (port interne 8091) |
 | Clé | option `cle_prod` | option `cle_test` |
 | Sites autorisés (CORS) | `https://celestindeal.github.io` | idem + `http://localhost:8080` (développement) |
@@ -132,18 +132,22 @@ Dans Home Assistant (`http://192.168.1.201:8123`) :
    **Démarrer**.
 5. Onglet **Journal** :
    - un lien `https://login.tailscale.com/…` s'affiche : l'ouvrir et se
-     connecter avec le **même compte Tailscale** que pour les pompiers ;
+     connecter avec votre compte Tailscale (réseau `taile55644.ts.net`) ;
+   - si le journal répète « your Tailscale account does not support getting
+     TLS certs » : dans <https://login.tailscale.com/admin/dns>, activer
+     **MagicDNS** puis **HTTPS Certificates**. Le module réessaie seul toutes
+     les 30 s ;
    - si un lien pour autoriser **Funnel** s'affiche, l'ouvrir aussi, puis
      **redémarrer le module** ;
    - attendre les lignes :
      ```
      [locatif] Serveur prêt.
-     [locatif]   PROD : https://gestion-locative.tail8a91ff.ts.net
-     [locatif]   TEST : https://gestion-locative.tail8a91ff.ts.net:8443
+     [locatif]   PROD : https://gestion-locative.taile55644.ts.net
+     [locatif]   TEST : https://gestion-locative.taile55644.ts.net:8443
      ```
 6. **Vérifier** dans un navigateur :
-   - <https://gestion-locative.tail8a91ff.ts.net/api/health>
-   - <https://gestion-locative.tail8a91ff.ts.net:8443/api/health>
+   - <https://gestion-locative.taile55644.ts.net/api/health>
+   - <https://gestion-locative.taile55644.ts.net:8443/api/health>
 
    Les deux doivent afficher `{"message":"API is healthy."…}`.
 
@@ -158,7 +162,7 @@ administrateur sur chaque base, sinon quelqu'un d'autre pourrait le faire.
 
 - Au premier démarrage, le **Journal** affiche pour chaque base un lien à
   usage unique `…/_/#/pbinstal/…`. L'ouvrir en remplaçant le début par
-  l'adresse publique (`https://gestion-locative.tail8a91ff.ts.net/_/…` pour la
+  l'adresse publique (`https://gestion-locative.taile55644.ts.net/_/…` pour la
   prod, `…ts.net:8443/_/…` pour le test).
 - Créer le compte avec un **mot de passe solide** (différent pour prod et test).
 - Tableau de bord ensuite : `https://<adresse>/_/` et `https://<adresse>:8443/_/`.
